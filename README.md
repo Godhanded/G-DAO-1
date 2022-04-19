@@ -1,6 +1,7 @@
 # G-DAO
 
-#Problem Definition
+# Problem Definition
+
 ZURI as an organisation needs to setup an election for leadership position in its school. The major stakeholders here are the school board of directors, the teachers and the students. Create a smart contract that enables the following:
  1. Each stakeholders should be able to vote.
  2. Setup Access control for all stakeholders
