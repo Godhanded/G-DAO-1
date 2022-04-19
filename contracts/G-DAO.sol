@@ -6,20 +6,22 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Elect is Ownable {
 
-    constructor(bytes32[] memory candidateNames) {
+    constructor() {
       Access[msg.sender] = true;
       dead = block.timestamp;
     }
-
-    // ERRORS IN THIS CONTRACT. NEEDS TO BE SOLVED. THIS IS A BASE CONTRACT FOR US TO WORK ON
   
-  mapping (bytes32 => uint8) public votesReceived;
 
   bytes32[] public candidateList;
   
+    mapping(string=>bool) Candidate;
+    mapping (string => uint8) public votesReceived;
+    mapping(address=>bool)voted;
     mapping(address => bool) private Access;
+    mapping (address=> bool) private teacher;
     uint256 dead;
     address chairman;
+
 
     modifier stakeholder {
       require(Access[msg.sender] == true, "You are not a stakeholder");
@@ -36,27 +38,43 @@ contract Elect is Ownable {
     }
 
     function enable() public {
-        require (msg.sender = chairman,"You are not the chairman");
+        require (msg.sender == chairman,"You are not the chairman");
         dead = block.timestamp;
     }
 
     function disable() public {
-      require(msg.sender = chairman,"You are not the chairman");
+      require(msg.sender == chairman,"You are not the chairman");
       dead = block.timestamp + 366 days;
     }
-  // This function increments the vote count for the specified candidate. This
-  // is equivalent to casting a vote
-  function voteCandidate(bytes32 candidate) public controlAccess {
-    require(validCandidate(candidate) == true, "This is not a candidate");
+  /**
+  @notice this function collects the candidates name, checks if it exists then counts a vote for said candidate
+  @param candidate collects candidates' name
+  */
+  function voteCandidate(string memory candidate) public controlAccess stakeholder returns(bytes32){
+    require(voted[msg.sender]==false,"You cant vote twice");
+    require(Candidate[candidate] == true, "This is not a candidate,ensure input is Uppercase");
+    voted[msg.sender]= true;
     votesReceived[candidate] += 1;
+    return "voted";
   }
 
 
-  // This function returns the total votes a candidate has received so far
-  function candidateVotes(bytes32 candidate) public stakeholder view returns (uint256) {
-   // require(msg.sender != student, "Student can not call this function");
-    require(validCandidate(candidate) == true, "This is not a candidate");
-    return votesReceived[candidate];
+  /**
+  @notice this function returns the number of votes of a candidate
+  @notice it checks if the user is the chairman or a teacher
+  @dev the uint value of votesRecieved is converted to string and returned with bstr
+  @param candidate collects candidates name
+  */
+  function candidateVotes(string memory candidate) public controlAccess view returns (string memory) {
+   if (msg.sender==chairman || teacher[msg.sender]==true)
+   {
+    require(Candidate[candidate] == true, "This is not a candidate");
+    bytes memory bstr = new bytes(votesReceived[candidate]);
+    return string(bstr);
+   }else 
+   {
+    return "You dont have access to this function";
+   }
   }
 
   function checkCandidate(bytes32 candidate) public view returns (bool) {
