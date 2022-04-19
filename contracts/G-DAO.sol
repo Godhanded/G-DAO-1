@@ -12,7 +12,7 @@ contract Elect is Ownable {
     }
   
 
-  bytes32[] public candidateList;
+  string[] public candidateList;
   
     mapping(string=>bool) Candidate;
     mapping (string => uint8) public votesReceived;
@@ -77,14 +77,44 @@ contract Elect is Ownable {
    }
   }
 
-  function checkCandidate(bytes32 candidate) public view returns (bool) {
+
+  /**
+  @notice this function checks if a candidate exists
+  @dev hashed the name in candidate list and compared it with the hash of candidate using keccak256
+       this is because solidity doesnt compare two string types with ==
+  @param candidate collects candidates name
+  */
+  function checkCandidate(string memory candidate) public view returns (bool) {
     for(uint i = 0; i < candidateList.length; i++) {
-      if (candidateList[i] == candidate) {
+      if (keccak256(abi.encodePacked(candidateList[i])) == keccak256(abi.encodePacked(candidate))) {
         return true;
       }
     }
     return false;
   }
-    
+   
+
+
+   /**
+  @notice this function adds a candidate to the contract
+  @notice it checks if the user is the chairman
+  @dev hashed the name in candidate list and compared it with the hash of candidate using keccak256
+       this is because solidity doesnt compare two string types with ==
+  @param candidate collects candidates name
+  */
+  function addcandidate(string memory candidate)public returns(bytes32)
+  {
+    require(msg.sender==chairman, "must be chairman");
+    for(uint256 i=0; i<=candidateList.length; i++)
+    {
+      if(keccak256(abi.encodePacked(candidateList[i])) == keccak256(abi.encodePacked(candidate)))
+      {
+        return "candidate already present";
+      }
+    }
+    candidateList.push(candidate);
+    Candidate[candidate]=true;
+    votesReceived[candidate]=0;
+  }
 
 }
