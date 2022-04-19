@@ -1,0 +1,70 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.button-auth {
+  background-color: rgb(48, 143, 226);
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  height: 2.5rem;
+  width: 30rem;
+  border: 0px;
+}
+
+.button-auth:hover {
+  background-color: rgb(6, 27, 44);
+}
+
+
+.candidate-pane {
+  width: 20rem;
+  padding: 1.25rem;
+  min-height: 25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0.5rem;
+  background-color: white;
+  border: 0.125rem solid white;
+  border-radius: 4px;
+}
+
+.candidate-pane h3 {
+  color: black;
+}
+
+.candidate-pane p {
+  color: grey;
+  font-size: small;
+}
+
+.candidate-pane img {
+  width: 18rem;
+  height: 18rem
+}
+
+.candidate-pane button {
+  background-color: rgb(48, 143, 226);
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  height: 2.5rem;
+  width: 10rem;
+  border: 0px;
+  margin: auto
+}
+
+.candidate-pane button:hover {
+  background-color: rgb(6, 27, 44);
+}
