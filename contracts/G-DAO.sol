@@ -132,11 +132,11 @@ contract Elect is Ownable {
   /**
    @notice function allows chairman and stakeholders add a teacher
    */
-  function addTeacher()public controlAccess returns(bool)
+  function addTeacher(address teach)public controlAccess returns(bool)
   {
     if(msg.sender==chairman || Access[msg.sender]==true)
     {
-    teacher[msg.sender]=true;
+    teacher[teach]=true;
     }else
     {
       return false;
