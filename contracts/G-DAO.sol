@@ -21,10 +21,18 @@ contract Elect is Ownable {
     mapping (address=> bool) private teacher;
     uint256 dead;
     address chairman;
+    bool start;
 
 
     modifier stakeholder {
       require(Access[msg.sender] == true, "You are not a stakeholder");
+      _;
+    }
+
+
+    modifier startvoting
+    {
+      require(start==true,"Its not yet time to vote");
       _;
     }
 
@@ -50,7 +58,7 @@ contract Elect is Ownable {
   @notice this function collects the candidates name, checks if it exists then counts a vote for said candidate
   @param candidate collects candidates' name
   */
-  function voteCandidate(string memory candidate) public controlAccess stakeholder returns(bytes32){
+  function voteCandidate(string memory candidate) public controlAccess stakeholder startvoting returns(bytes32){
     require(voted[msg.sender]==false,"You cant vote twice");
     require(Candidate[candidate] == true, "This is not a candidate,ensure input is Uppercase");
     voted[msg.sender]= true;
@@ -77,13 +85,6 @@ contract Elect is Ownable {
    }
   }
 
-
-  /**
-  @notice this function checks if a candidate exists
-  @dev hashed the name in candidate list and compared it with the hash of candidate using keccak256
-       this is because solidity doesnt compare two string types with ==
-  @param candidate collects candidates name
-  */
   function checkCandidate(string memory candidate) public view returns (bool) {
     for(uint i = 0; i < candidateList.length; i++) {
       if (keccak256(abi.encodePacked(candidateList[i])) == keccak256(abi.encodePacked(candidate))) {
@@ -115,6 +116,49 @@ contract Elect is Ownable {
     candidateList.push(candidate);
     Candidate[candidate]=true;
     votesReceived[candidate]=0;
+  }
+
+  
+   /**
+   @notice function allows chairman add stake holders
+   */
+  function addStakeholder(address holder)public 
+  {
+    require(msg.sender==chairman,"only chairman");
+    Access[holder]=true;
+  }
+
+  
+  /**
+   @notice function allows chairman and stakeholders add a teacher
+   */
+  function addTeacher()public controlAccess returns(bool)
+  {
+    if(msg.sender==chairman || Access[msg.sender]==true)
+    {
+    teacher[msg.sender]=true;
+    }else
+    {
+      return false;
+    }
+  }
+
+   /**
+   @notice function allows chairman start voting proccess
+   */
+  function beginVote()public
+  {
+    require(msg.sender== chairman,"you're not the chair man");
+    start = true;
+  }
+
+   /**
+   @notice function allows chairman end voting proccess
+   */
+  function endVote()public
+  {
+    require(msg.sender==chairman,"you're not the chairman ");
+    start = false;
   }
 
 }
