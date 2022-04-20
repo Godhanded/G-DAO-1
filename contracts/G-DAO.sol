@@ -23,6 +23,15 @@ contract Elect is Ownable {
     address chairman;
     bool start;
 
+    /**
+    @notice this event logs the ressult of the election and the position being contested for
+    @dev the role parameter will be passed in by a stake holder
+    @param role position contested for
+    @param candidate candidate contesting
+    @param votes total number of votes
+    */
+    event result(string role, string candidate, uint256 votes);
+
 
     modifier stakeholder {
       require(Access[msg.sender] == true, "You are not a stakeholder");
@@ -70,7 +79,7 @@ contract Elect is Ownable {
   /**
   @notice this function returns the number of votes of a candidate
   @notice it checks if the user is the chairman or a teacher
-  @dev the uint value of votesRecieved is converted to string and returned with bstr
+  @dev the uint value of votesReceived is converted to string and returned with bstr
   @param candidate collects candidates name
   */
   function candidateVotes(string memory candidate) public controlAccess view returns (string memory) {
@@ -85,7 +94,7 @@ contract Elect is Ownable {
    }
   }
 
-  function checkCandidate(string memory candidate) public view returns (bool) {
+  function checkCandidate(string memory candidate) public view controlAccess returns (bool) {
     for(uint i = 0; i < candidateList.length; i++) {
       if (keccak256(abi.encodePacked(candidateList[i])) == keccak256(abi.encodePacked(candidate))) {
         return true;
@@ -103,7 +112,7 @@ contract Elect is Ownable {
        this is because solidity doesnt compare two string types with ==
   @param candidate collects candidates name
   */
-  function addcandidate(string memory candidate)public returns(bytes32)
+  function addcandidate(string memory candidate)public controlAccess returns(bytes32)
   {
     require(msg.sender==chairman, "must be chairman");
     for(uint256 i=0; i<=candidateList.length; i++)
@@ -122,7 +131,7 @@ contract Elect is Ownable {
    /**
    @notice function allows chairman add stake holders
    */
-  function addStakeholder(address holder)public 
+  function addStakeholder(address holder)public controlAccess
   {
     require(msg.sender==chairman,"only chairman");
     Access[holder]=true;
@@ -146,7 +155,7 @@ contract Elect is Ownable {
    /**
    @notice function allows chairman start voting proccess
    */
-  function beginVote()public
+  function beginVote()public controlAccess
   {
     require(msg.sender== chairman,"you're not the chair man");
     start = true;
@@ -155,10 +164,24 @@ contract Elect is Ownable {
    /**
    @notice function allows chairman end voting proccess
    */
-  function endVote()public
+  function endVote()public controlAccess
   {
     require(msg.sender==chairman,"you're not the chairman ");
     start = false;
+  }
+
+   
+    /**
+   @notice function allows stakeholders to make the results of the election visible to all students
+   @param role stake holder inputs the post that was being contested for
+   */
+  function publicResults(string memory role)public controlAccess stakeholder
+  {
+    require(start == false,"voting has to end first");
+    for(uint256 i=0; i<=candidateList.length;i++)
+    {
+      emit result (role, candidateList[i], votesReceived[candidateList[i]]);
+    }
   }
 
 }
