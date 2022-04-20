@@ -24,7 +24,7 @@ contract Elect is Ownable {
     address chairman;
     bool start;
     uint256[]  winnerid;
-    uint256 count=0;
+    uint256 public count=0;
 
     struct candid
     {
