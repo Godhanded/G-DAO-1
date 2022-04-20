@@ -35,6 +35,7 @@ code {
   flex-direction: column;
   justify-content: center;
   margin: 0.5rem;
+  color: black;
   background-color: white;
   border: 0.125rem solid white;
   border-radius: 4px;
@@ -67,4 +68,35 @@ code {
 
 .candidate-pane button:hover {
   background-color: rgb(6, 27, 44);
+}
+
+.voting-bar {
+  background-color: gray;
+  width: 80%;
+  min-height: 2rem;
+  padding: 1rem;
+  margin: 2rem auto;
+  border-radius: 5px;
+}
+
+.voting-bar-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.voting-bar-header h2 {
+  margin: 0;
+}
+
+.candidate-view {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+}
+
+.voting-page {
+  
 }
