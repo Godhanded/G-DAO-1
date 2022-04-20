@@ -77,15 +77,22 @@ contract Elect is Ownable {
    }
   }
 
-  /**function checkCandidate(string memory candidate) public view returns (bool) {
+
+  /**
+  @notice this function checks if a candidate exists
+  @dev hashed the name in candidate list and compared it with the hash of candidate using keccak256
+       this is because solidity doesnt compare two string types with ==
+  @param candidate collects candidates name
+  */
+  function checkCandidate(string memory candidate) public view returns (bool) {
     for(uint i = 0; i < candidateList.length; i++) {
-      if (candidateList[i] == candidate) {
+      if (keccak256(abi.encodePacked(candidateList[i])) == keccak256(abi.encodePacked(candidate))) {
         return true;
       }
     }
     return false;
   }
-  */  
+   
 
 
    /**
