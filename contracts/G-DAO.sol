@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -15,16 +15,16 @@ contract Elect is Ownable {
   string[] public candidateList;
   
     mapping(uint256=>bool) Candidate;
-    mapping (uint256 => uint256) public votesReceived;
+    mapping (uint256 => uint256) private votesReceived;
     mapping(address=>bool)voted;
     mapping(address => bool) private Access;
     mapping (address=> bool) private teacher;
-    mapping (uint256=>candid)contestant;
+    mapping (uint256 => candid)contestant;
     uint256 dead;
     address chairman;
     bool start;
     uint256[]  winnerid;
-    uint256 public count=0;
+    uint256 count=0;
 
     struct candid
     {
@@ -75,6 +75,75 @@ contract Elect is Ownable {
       require(msg.sender == chairman,"You are not the chairman");
       dead = block.timestamp + 366 days;
     }
+
+   /**
+   @notice function allows chairman start voting proccess
+   */
+  function beginVote()public controlAccess
+  {
+    require(msg.sender== chairman,"you're not the chairman");
+    start = true;
+  }
+
+   /**
+   @notice function allows chairman end voting proccess
+   */
+  function endVote()public controlAccess
+  {
+    require(msg.sender==chairman,"you're not the chairman ");
+    start = false;
+  }
+
+  
+   /**
+   @notice function allows chairman add stake holders
+   */
+  function addStudent(address _student)public onlyOwner controlAccess returns(bool)
+  {
+    Access[_student]=true;
+    return true;
+  }
+
+  
+  /**
+   @notice function allows only owner to add a teacher
+   */
+  function addTeacher(address _teacher)public onlyOwner controlAccess returns(bool)
+  {
+    Access[_teacher]=true;
+    return true;
+  }
+
+  /**
+   @notice function allows only owner to add a director
+   */
+  function addDirector(address _director) public onlyOwner controlAccess returns(bool)
+  {
+    Access[_director] = true;
+    return true;
+  }
+
+   /**
+  @notice this function adds a candidate to the contract
+  @notice it checks if the user is the chairman
+  @dev hashed the name in candidate list and compared it with the hash of candidate using keccak256
+       this is because solidity doesnt compare two string types with ==
+  @param candidate collects candidates name
+  */
+  function addCandidate(string memory candidate,string memory position, string memory link)public controlAccess
+  {
+    require(msg.sender==chairman, "must be chairman");
+    uint256 Count=count + 1;
+    count++;
+    candidateList.push(candidate);
+    Candidate[Count]=true;
+    votesReceived[Count]=0;
+    contestant[Count]=candid(count, candidate, position, link );
+    emit candidates(count, candidate, position, link);
+  }
+
+
+
   /**
   @notice this function collects the candidates name, checks if it exists then counts a vote for said candidate
   @param candidate collects candidates' name
@@ -116,69 +185,6 @@ contract Elect is Ownable {
   }
    
 
-
-   /**
-  @notice this function adds a candidate to the contract
-  @notice it checks if the user is the chairman
-  @dev hashed the name in candidate list and compared it with the hash of candidate using keccak256
-       this is because solidity doesnt compare two string types with ==
-  @param candidate collects candidates name
-  */
-  function addcandidate(string memory candidate,string memory position, string memory link)public controlAccess
-  {
-    require(msg.sender==chairman, "must be chairman");
-    uint256 Count=count + 1;
-    count++;
-    candidateList.push(candidate);
-    Candidate[Count]=true;
-    votesReceived[Count]=0;
-    contestant[Count]=candid(count, candidate, position, link );
-    emit candidates(count, candidate, position, link);
-  }
-
-  
-   /**
-   @notice function allows chairman add stake holders
-   */
-  function addStakeholder(address holder)public controlAccess returns(bool)
-  {
-    require(msg.sender==chairman,"only chairman");
-    Access[holder]=true;
-    return true;
-  }
-
-  
-  /**
-   @notice function allows chairman and stakeholders add a teacher
-   */
-  function addTeacher(address teach)public controlAccess returns(bool)
-  {
-    if(msg.sender==chairman || Access[msg.sender]==true)
-    {
-    teacher[teach]=true;
-    }else
-    {
-      return false;
-    }
-  }
-
-   /**
-   @notice function allows chairman start voting proccess
-   */
-  function beginVote()public controlAccess
-  {
-    require(msg.sender== chairman,"you're not the chair man");
-    start = true;
-  }
-
-   /**
-   @notice function allows chairman end voting proccess
-   */
-  function endVote()public controlAccess
-  {
-    require(msg.sender==chairman,"you're not the chairman ");
-    start = false;
-  }
 
    
     /**
