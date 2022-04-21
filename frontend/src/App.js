@@ -32,10 +32,25 @@ function App() {
     console.log("Voted for Ebube");
   }
 
-  // const handleSignIn = () => {
-  //   console.log("Signing in...");
-  //   setCurrentPage('home')
-  // }
+  const startVote = () => {
+     contract.methods.beginVote().send({
+       from:selectedAccount
+     }).then(() => { alert('Started voting session')
+     setElectionPhase(1) 
+    }).catch((err) => {console.log(err) })
+  }
+
+  const endVote = () => {
+    contract.methods.endVote().send({
+      from:selectedAccount
+    }).then(() => { alert('Ended voting session')
+    setElectionPhase(2) 
+   }).catch((err) => {console.log(err) })
+ }
+
+  const disableContract = () => {
+    
+  }
 
   const handleSignIn = async () => {
     let provider = window.ethereum;
@@ -123,7 +138,7 @@ function App() {
           {electionPhase === 2 ? <p> Come back later to view results after the have been published</p> : <p> You would be notified when it commences</p>}
           </div>)}
 
-        {currentPage === 'admin' && <AdminPage startVote = {() => setElectionPhase(1)} endVote = {() => setElectionPhase(2)} accountType = {accountType}/>}
+        {currentPage === 'admin' && <AdminPage startVote = {startVote} endVote = {endVote} accountType = {accountType}/>}
       </div>
       </>}
       {/* <header className="App-header">
