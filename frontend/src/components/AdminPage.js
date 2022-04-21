@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const AdminPage = ({startVote, endVote, accountType}) => {
+const AdminPage = ({startVote, endVote, accountType, enableContract, disableContract, contractLive}) => {
     const [newAdmin, setNewAdmin] = useState('')
     const [candidateName, setCandidateName] = useState('')
     const [position, setPosition] = useState('')
@@ -62,6 +62,16 @@ const AdminPage = ({startVote, endVote, accountType}) => {
 
                         <input type="submit" placeholder= "Declare"/>
                     </form>
+
+            <h3>Contract Availability</h3>
+            <div className= "start-and-end-vote">
+                <button className= "start-vote" onClick= {enableContract}>
+                    Enable Contract
+                </button>
+                <button className= "end-vote" onClick= {disableContract}>
+                    Disable Contract
+                </button>
+            </div>
             
         </div>
     )
