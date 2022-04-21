@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 
-const Landing = ({handleSignIn}) => {
+const Landing = ({handleSignIn, notice}) => {
 
     // const connectWallet = async (router) => {
 	// 	const providerOptions = {
@@ -289,6 +289,9 @@ const Landing = ({handleSignIn}) => {
             <button className= "button-auth" onClick= {handleSignIn}>
                 Sign In
             </button>
+			{notice && <p style= {{color: 'red'}}> 
+			Alert: You need to install MetaMask or any Wallet Authentication extension to use this app
+			</p>}
         </div>
         
     )
