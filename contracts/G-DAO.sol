@@ -14,23 +14,35 @@ contract Elect is Ownable {
 
   string[] public candidateList;
   
-    mapping(string=>bool) Candidate;
-    mapping (string => uint8) public votesReceived;
+    mapping(uint256=>bool) Candidate;
+    mapping (uint256 => uint256) public votesReceived;
     mapping(address=>bool)voted;
     mapping(address => bool) private Access;
     mapping (address=> bool) private teacher;
+    mapping (uint256=>candid)contestant;
     uint256 dead;
     address chairman;
     bool start;
+    uint256[]  winnerid;
+    uint256 count=0;
+
+    struct candid
+    {
+        uint256 ID;
+        string name;
+        string position;
+        string ipfs;
+    }
 
     /**
     @notice this event logs the ressult of the election and the position being contested for
-    @dev the role parameter will be passed in by a stake holder
-    @param role position contested for
-    @param candidate candidate contesting
+    @dev the Candid parameter will be a struct representing a contestant
+    @param Candid candidate contesting
     @param votes total number of votes
     */
-    event result(string role, string candidate, uint256 votes);
+    event result(candid Candid, uint256 votes);
+    event candidates(uint256 ID, string name, string position, string ipfs);
+    event Winner(candid winner, uint256 votes);
 
 
     modifier stakeholder {
@@ -67,9 +79,9 @@ contract Elect is Ownable {
   @notice this function collects the candidates name, checks if it exists then counts a vote for said candidate
   @param candidate collects candidates' name
   */
-  function voteCandidate(string memory candidate) public controlAccess stakeholder startvoting returns(bytes32){
+  function voteCandidate(uint256 candidate) public controlAccess stakeholder startvoting returns(bytes32){
     require(voted[msg.sender]==false,"You cant vote twice");
-    require(Candidate[candidate] == true, "This is not a candidate,ensure input is Uppercase");
+    require(Candidate[candidate] == true, "This is not a candidate");
     voted[msg.sender]= true;
     votesReceived[candidate] += 1;
     return "voted";
@@ -82,7 +94,7 @@ contract Elect is Ownable {
   @dev the uint value of votesReceived is converted to string and returned with bstr
   @param candidate collects candidates name
   */
-  function candidateVotes(string memory candidate) public controlAccess view returns (string memory) {
+  function candidateVotes(uint256 candidate) public controlAccess view returns (string memory) {
    if (msg.sender==chairman || teacher[msg.sender]==true)
    {
     require(Candidate[candidate] == true, "This is not a candidate");
@@ -112,29 +124,27 @@ contract Elect is Ownable {
        this is because solidity doesnt compare two string types with ==
   @param candidate collects candidates name
   */
-  function addcandidate(string memory candidate)public controlAccess returns(bytes32)
+  function addcandidate(string memory candidate,string memory position, string memory link)public controlAccess
   {
     require(msg.sender==chairman, "must be chairman");
-    for(uint256 i=0; i<=candidateList.length; i++)
-    {
-      if(keccak256(abi.encodePacked(candidateList[i])) == keccak256(abi.encodePacked(candidate)))
-      {
-        return "candidate already present";
-      }
-    }
+    uint256 Count=count + 1;
+    count++;
     candidateList.push(candidate);
-    Candidate[candidate]=true;
-    votesReceived[candidate]=0;
+    Candidate[Count]=true;
+    votesReceived[Count]=0;
+    contestant[Count]=candid(count, candidate, position, link );
+    emit candidates(count, candidate, position, link);
   }
 
   
    /**
    @notice function allows chairman add stake holders
    */
-  function addStakeholder(address holder)public controlAccess
+  function addStakeholder(address holder)public controlAccess returns(bool)
   {
     require(msg.sender==chairman,"only chairman");
     Access[holder]=true;
+    return true;
   }
 
   
@@ -173,14 +183,42 @@ contract Elect is Ownable {
    
     /**
    @notice function allows stakeholders to make the results of the election visible to all students
-   @param role stake holder inputs the post that was being contested for
    */
-  function publicResults(string memory role)public controlAccess stakeholder
+  function publicResults()public controlAccess stakeholder
   {
     require(start == false,"voting has to end first");
-    for(uint256 i=0; i<=candidateList.length;i++)
+    for(uint256 i=1; i<=count; i++)
     {
-      emit result (role, candidateList[i], votesReceived[candidateList[i]]);
+      emit result (contestant[i], votesReceived[i]);
+    }
+
+   }
+   
+    
+    /**
+   @notice function shows th winner or winners of the election
+   */
+   function showwinner()public stakeholder
+   {
+    require(start == false,"voting has to end first");
+    uint256 winvote=0;
+    for(uint256 i=1; i<=count; i++)
+    {
+        if(votesReceived[i]>winvote)
+        {
+            winvote=votesReceived[i];
+            delete winnerid;
+            winnerid.push(i);
+
+        }else if(votesReceived[i]==winvote)
+        {
+            winnerid.push(i);
+        }
+        
+    }
+    for(uint256 i=0; i<winnerid.length; i++)
+    {
+    emit Winner(contestant[winnerid[i]], votesReceived[winnerid[i]]);
     }
   }
 
