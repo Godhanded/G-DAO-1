@@ -134,37 +134,36 @@ contract Elect is Ownable {
   }
   
   /**
-   * @notice Add student to have access as a stakeholder
+   * @notice Adds an array of student to have access as a stakeholder
    * @param _student The address of the student to be given access
-   * @return Whether or not the access assigned succeeded
    */
-  function addStudent(address _student)public onlyOwner controlAccess returns(bool)
+  function addStudent(address[] memory _student)public onlyOwner controlAccess
   {
-    Access[_student]=true;
-    return true;
+    for(uint i = 0; i < _student.length; i++) {
+        Access[_student[i]] = true;
+    }
   }
 
-  
   /**
-   * @notice Add teacher to have access as a stakeholder
+   * @notice Adds an array of teacher to have access as a stakeholder
    * @param _teacher The address of the student to be given access
-   * @return Whether or not the access assigned succeeded
    */
-  function addTeacher(address _teacher)public onlyOwner controlAccess returns(bool)
+  function addTeacher(address[] memory _teacher)public onlyOwner controlAccess
   {
-    Access[_teacher]=true;
-    return true;
+    for(uint i = 0; i < _teacher.length; i++) {
+        Access[_teacher[i]] = true;
+    }
   }
 
   /**
-   * @notice Add director to have access as a stakeholder
+   * @notice Adds an array of director to have access as a stakeholder
    * @param _director The address of the director to be given access
-   * @return Whether or not the access assigned succeeded
    */
-  function addDirector(address _director) public onlyOwner controlAccess returns(bool)
+  function addDirector(address[] memory _director) public onlyOwner controlAccess
   {
-    Access[_director] = true;
-    return true;
+    for(uint i = 0; i < _director.length; i++) {
+        Access[_director[i]] = true;
+    }
   }
 
   /**
