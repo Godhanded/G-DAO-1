@@ -1,12 +1,8 @@
 import { useState } from 'react';
 
-const NavBar = ({address, accountType, toggleHome}) => {
+const NavBar = ({address, accountType, toggleHome, disconnectAccount}) => {
 
     const [showingHome, setShowingHome] = useState(true);
-
-    const handleWalletDisconnect = () => {
-        console.log("Disconnecting wallet");
-    }
 
     const setHomeToggle = (homeOrAdmin) => {
         homeOrAdmin === 'home' && setShowingHome(true);
@@ -28,7 +24,7 @@ const NavBar = ({address, accountType, toggleHome}) => {
                     </button>}
 
                     <p>{`${address.substring(0,7)}...`}</p>
-                    <button className= "sign-out" onClick= {handleWalletDisconnect}>
+                    <button className= "sign-out" onClick= {disconnectAccount}>
                         Sign Out
                     </button>
                 </div>

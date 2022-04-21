@@ -6,13 +6,21 @@ import VotingPage from './components/VotingPage';
 import DeclareInterest from './components/DeclareInterest';
 import NavBar from './components/NavBar';
 import AdminPage from './components/AdminPage';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Web3 from 'web3/dist/web3.min.js';
+import StakerContract from './StakerApp.json'
+import { contactAddress } from './contractAddress';
 
 function App() {
   const [electionPhase, setElectionPhase] = useState(0);
   const [currentPage, setCurrentPage] = useState('login');
   const [accountType, setAccountType] = useState('Chairman');
-  const [votingStarted, setVotingStarted] = useState(false)
+  // const [votingStarted, setVotingStarted] = useState(false)
+  // const [votingEnded, setVotingEnded] = useState(false)
+  const [loaded, setLoaded] = useState(0);
+  const [contract, setContract] = useState({});
+  const [loginNotice, setLoginNotice] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState('')
 
   const student = {
     name: "Ebube Ebube",
@@ -24,10 +32,57 @@ function App() {
     console.log("Voted for Ebube");
   }
 
-  const handleSignIn = () => {
-    console.log("Signing in...");
-    setCurrentPage('home')
-  }
+  // const handleSignIn = () => {
+  //   console.log("Signing in...");
+  //   setCurrentPage('home')
+  // }
+
+  const handleSignIn = async () => {
+    let provider = window.ethereum;
+    console.log(provider);
+    setLoaded(1)
+  
+    if (typeof provider !== 'undefined') {
+      provider
+        .request({ method: 'eth_requestAccounts' })
+        .then((accounts) => {
+          setSelectedAccount(accounts[0]);
+          console.log(`Selected account is ${selectedAccount}`);
+          setLoaded(2)
+          setCurrentPage('home')
+
+        })
+        .catch((err) => {
+          console.log(err);
+          return;
+        });
+  
+      window.ethereum.on('accountsChanged', function (accounts) {
+        setLoaded(1)
+        setSelectedAccount(accounts[0]);
+        console.log(`Selected account changed to ${selectedAccount}`)
+        setTimeout(() => setLoaded(2), 1000)
+      });
+    }
+  };
+
+  useEffect(() => {
+    let provider = window.ethereum;
+
+    if (typeof provider === 'undefined') {
+      setLoginNotice(true);
+      return;
+    }
+
+    console.log(provider)
+
+    const web3 = new Web3(provider);
+    setContract(new web3.eth.Contract(
+    	StakerContract.abi,
+    	contactAddress
+    ));
+
+  }, [])
 
   const posts = ['President', 'Vice President'];
 
@@ -55,20 +110,20 @@ function App() {
 
   return (
     <div className="App">
-      {currentPage === 'login' ? <Landing handleSignIn= {handleSignIn} /> :
+      {currentPage === 'login' ? <Landing handleSignIn= {handleSignIn} notice = {loginNotice} /> :
       <>
-      <NavBar address = {'0x940Fbxc678njkmhbjj'} accountType = {accountType} toggleHome = {(homeOrAdmin) => setCurrentPage(homeOrAdmin)} />
+      <NavBar address = {selectedAccount} accountType = {accountType} toggleHome = {(homeOrAdmin) => setCurrentPage(homeOrAdmin)} disconnectAccount= {()=> setCurrentPage('login')} />
       <div className= "layout">
         <h3>Welcome, {accountType}</h3>
         <hr/>
-        {currentPage === 'home' && (votingStarted ? <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} /> :
+        {currentPage === 'home' && (electionPhase === 1 ? <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} contract = {contract}/> :
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-          <p> Voting has not commenced yet</p>
+          {electionPhase === 2 ? <p> Voting session has been concluded</p> : <p> Voting has not commenced yet</p>}
           <p> {'   '}</p>
-          <p> You would be notified when it commences</p>
+          {electionPhase === 2 ? <p> Come back later to view results after the have been published</p> : <p> You would be notified when it commences</p>}
           </div>)}
 
-        {currentPage === 'admin' && <AdminPage />}
+        {currentPage === 'admin' && <AdminPage startVote = {() => setElectionPhase(1)} endVote = {() => setElectionPhase(2)} accountType = {accountType}/>}
       </div>
       </>}
       {/* <header className="App-header">
