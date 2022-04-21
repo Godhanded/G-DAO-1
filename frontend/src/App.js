@@ -15,6 +15,7 @@ function App() {
   const [electionPhase, setElectionPhase] = useState(0);
   const [currentPage, setCurrentPage] = useState('login');
   const [accountType, setAccountType] = useState('Chairman');
+  const [contractAvailability, setContractAvailability] = useState(true);
   // const [votingStarted, setVotingStarted] = useState(false)
   // const [votingEnded, setVotingEnded] = useState(false)
   const [loaded, setLoaded] = useState(0);
@@ -48,8 +49,20 @@ function App() {
    }).catch((err) => {console.log(err) })
  }
 
+ const enableContract = () => {
+  contract.methods.enable().send({
+    from:selectedAccount
+  }).then(() => { alert('Contract enabled')
+  setContractAvailability(true) 
+ }).catch((err) => {console.log(err) })
+ }
+
   const disableContract = () => {
-    
+    contract.methods.disable().send({
+      from:selectedAccount
+    }).then(() => { alert('Contract Disabled')
+    setContractAvailability(false) 
+   }).catch((err) => {console.log(err) })
   }
 
   const handleSignIn = async () => {
