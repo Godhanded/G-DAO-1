@@ -12,6 +12,31 @@ code {
     monospace;
 }
 
+.layout {
+  width: 65%;
+  margin:auto;
+  background-color: white;
+  min-height: 100vh;
+  /* display: flex;
+  flex-direction: column;
+  align-items: center; */
+  text-align: left;
+  font-size: calc(10px + 2vmin);
+  color: black;
+}
+
+.landing-page {
+  width: 65%;
+  margin:auto;
+  background-color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: black;
+}
+
 .button-auth {
   background-color: rgb(48, 143, 226);
   color: white;
@@ -41,9 +66,10 @@ code {
   border-radius: 4px;
 }
 
-.candidate-pane h3 {
-  color: black;
+.candidate-pane h2 {
+  margin: 0;
 }
+
 
 .candidate-pane p {
   color: grey;
@@ -98,5 +124,136 @@ code {
 }
 
 .voting-page {
+  width: 100%;
+  text-align: center;
+}
+
+.voting-page p {
+  font-size: large;
+}
+
+
+.interest-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  width: 60%;
+  min-height: 20rem;
+  margin: auto;
+}
+
+.interest-form input {
+  width: 100%;
+  height: 2.5rem;
+  border-radius: 5px;
+  font-size: large;
+}
+
+.interest-form label {
+  font-size: medium;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
   
+}
+
+.nav-bar {
+  background-color: rgb(46, 46, 248);
+  color: white;
+  width: 100%;
+  position: static;
+  padding: 5px 0;
+
+}
+
+.nav-bar-main {
+  width: 70%;
+  margin: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+}
+
+.nav-buttons {
+  width: 40%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  
+}
+
+.nav-buttons button {
+  border-radius: 5px;
+  border: 0;
+  padding: 0.25rem 2.5rem;
+  cursor: pointer;
+}
+
+.nav-select {
+  background-color: cornsilk;
+  color: black;
+
+}
+
+.nav-unselect {
+  background-color: transparent;
+  color: white;
+}
+
+.sign-out {
+  background-color: red;
+  color: white;
+  font-size: 15px;
+}
+
+.sign-out:hover {
+  font-size: 18px;
+  padding: 0.25rem 2.25rem;
+}
+
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.start-and-end-vote {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 50%;
+}
+
+.start-and-end-vote button {
+  width: 30%;
+  height: 3rem;
+  border: 0;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+  color: white;
+  background-color: black;
+
+}
+
+.start-and-end-vote button:hover {
+  font-size: 16px;
+}
+
+.start-vote {
+  background-color: green !important;
+}
+
+.end-vote {
+  background-color: red !important;
+}
+
+.start-and-end-vote input {
+  width: 60%;
+  height: 3rem;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: text;
+
 }
