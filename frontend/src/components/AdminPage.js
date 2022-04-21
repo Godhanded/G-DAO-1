@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
-const AdminPage = ({startVote, endVote, accountType}) => {
+const AdminPage = ({startVote, endVote, accountType, address}) => {
     const [newAdmin, setNewAdmin] = useState('')
     const [candidateName, setCandidateName] = useState('')
     const [position, setPosition] = useState('')
-    const [picture, setPicture] = useState('')
+    const [picture, setPicture] = useState(null)
 
     const handleStartVote = () => {
         console.log('Started Voting season');
@@ -22,10 +22,28 @@ const AdminPage = ({startVote, endVote, accountType}) => {
     }
 
     const handleAddCandidate = () => {
-        console.log('Added Candidate')
-        setCandidateName('')
-        setPosition('')
-        setPicture('')
+        if (picture === null) {
+			alert('Please upload an image');
+        return;
+		}
+		try {
+			const res = await client.add(picture, {
+				progress: (prog) => console.log(`received: ${prog}`),
+			});
+            await contract.methods.addCandidate(
+				candidateName,
+				position,
+				res.path,
+			).send({from : address})
+            alert('Candidate Added');	
+            console.log('Added Candidate')
+            setCandidateName('')
+            setPosition('')
+            setPicture('')
+        } 
+        catch (error) {
+			alert(error);
+		}           
     }
 
 
@@ -54,11 +72,11 @@ const AdminPage = ({startVote, endVote, accountType}) => {
                         <label htmlFor="candidateName">  Full Name </label>
                         <input type= "text" placeholder= "Enter full name here" value= {candidateName} onChange= {(e)=> setCandidateName(e.target.value)} />
 
-                        <label htmlFor="level"> Position </label>
+                        <label htmlFor="position"> Position </label>
                         <input type= "text" placeholder= "Enter position here" value= {position} onChange= {(e)=> setPosition(e.target.value)} />
 
                         <label htmlFor="picture"> Photograph </label>
-                        <input type= "file" placeholder= "Enter your catchphrase here" value= {picture} onChange= {(e)=> setPicture(e.target.value)} />
+                        <input type= "file"   onChange= {(e)=> setPicture(e.target.files[0])} />
 
                         <input type="submit" placeholder= "Declare"/>
                     </form>
