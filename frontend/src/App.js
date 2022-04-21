@@ -4,10 +4,15 @@ import Candidate from './components/Candidate';
 import Landing from './components/Landing';
 import VotingPage from './components/VotingPage';
 import DeclareInterest from './components/DeclareInterest';
+import NavBar from './components/NavBar';
+import AdminPage from './components/AdminPage';
 import { useState } from 'react';
 
 function App() {
   const [electionPhase, setElectionPhase] = useState(0);
+  const [currentPage, setCurrentPage] = useState('login');
+  const [accountType, setAccountType] = useState('Chairman');
+  const [votingStarted, setVotingStarted] = useState(false)
 
   const student = {
     name: "Ebube Ebube",
@@ -21,6 +26,7 @@ function App() {
 
   const handleSignIn = () => {
     console.log("Signing in...");
+    setCurrentPage('home')
   }
 
   const posts = ['President', 'Vice President'];
@@ -45,30 +51,35 @@ function App() {
       post: 'Vice President'
     }];
 
-
+    console.log(currentPage)
 
   return (
     <div className="App">
+      {currentPage === 'login' ? <Landing handleSignIn= {handleSignIn} /> :
+      <>
+      <NavBar address = {'0x940Fbxc678njkmhbjj'} accountType = {accountType} toggleHome = {(homeOrAdmin) => setCurrentPage(homeOrAdmin)} />
+      <div className= "layout">
+        <h3>Welcome, {accountType}</h3>
+        <hr/>
+        {currentPage === 'home' && (votingStarted ? <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} /> :
+        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+          <p> Voting has not commenced yet</p>
+          <p> {'   '}</p>
+          <p> You would be notified when it commences</p>
+          </div>)}
+
+        {currentPage === 'admin' && <AdminPage />}
+      </div>
+      </>}
+      {/* <header className="App-header">
       
-      <header className="App-header">
       
-      <Landing handleSignIn= {handleSignIn} />
       <Candidate student = {student} handleVote = {handleVote} />
       <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} />
       <DeclareInterest posts = {posts} />
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      
+        
+      </header> */}
     </div>
   );
 }

@@ -19,7 +19,7 @@ const VotingPage = ({posts, candidatesByPost}) => {
 
         <div className= "voting-page">
             <h1>
-                Election Page
+                Elections are Live
             </h1>
             <p> Select your choice candidate from the different categories. Note that you can only vote one candidate per category.</p>
 
