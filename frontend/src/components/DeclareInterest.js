@@ -18,9 +18,9 @@ const DeclareInterest = ({posts}) => {
 
     return (
         <div className= "voting-page">
-            <h1>
+            <h3>
                 Declaration of Interests
-            </h1>
+            </h3>
             <p> Select post to declare interest from the list below and </p>
 
             {currentSelection === '' ? posts.map((post, index) => {
