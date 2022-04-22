@@ -179,7 +179,6 @@ contract Elect is Ownable {
    function addStakeholders(address[] memory addresses, string[] memory accountTypes) public onlyOwner controlAccess {
       require(addresses.length == accountTypes.length, "the roles and addresses provided differ");     
       for (uint i = 0; i < addresses.length; i++) {
-         require(addresses[i]!=address(0),"no zero address");
           if (keccak256(abi.encodePacked(accountTypes[i])) == keccak256(abi.encodePacked('student'))) {
               Students[addresses[i]] = true;
               Access[addresses[i]] = true;
