@@ -13,6 +13,7 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
     const [viewCandidates, setViewCandidates] = useState(false)
     const [viewResults, setViewResults] = useState(false)
     const [file, setFile] = useState()
+    const [accountType_, setAccountType_] = useState('')
     const create = ipfsClient.create;
 	  const client = create(`https://ipfs.infura.io:5001/api/v0`);
     const fileReader = new FileReader();
@@ -33,8 +34,20 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
         setNewAdmin('');
     }
 
+    const getType = async () => {
+        if(!newAdmin) {alert('Enter a valid address'); return;}
+        try {
+            const res = await contract.methods.getAccountType(newAdmin).call()
+            setAccountType_(res);
+            setNewAdmin('');
+        } 
+        catch (error) {
+            alert(error);
+        } 
+    }
 
-    const handleAddStakeholders = (e) => {
+
+    const handleAddStakeholders = async (e) => {
         e.preventDefault();
 
         let res = [];
@@ -57,6 +70,17 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
 
             fileReader.readAsText(file);
         }
+
+        if (res.length === roles.length) {
+            try {
+                await contract.methods.addStakeholders().send({from : address})
+                alert('Results set to Published');	
+                console.log('Added Candidate')
+            } 
+            catch (error) {
+                alert(error);
+            } 
+        } else alert("The number of addresses you sent do not match the number of roles. Check your file and try again.")
         
     }
 
@@ -72,7 +96,7 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
     }
 
 
-    const handleAddCandidate = () => {
+    const handleAddCandidate = async () => {
         if (picture === null) {
 			alert('Please upload an image');
         return;
@@ -118,12 +142,13 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
             </div>
 
             <h3>
-                Add New Admin
+                Check Account Type
             </h3>
             <div className= "start-and-end-vote">
                 <input type= 'text' placeholder= 'Enter Address' value = {newAdmin} onChange= {(e) => setNewAdmin(e.target.value)} />
-                <button onClick = {handleAddAdmin}> Add Admin</button>
+                <button onClick = {getType}> Check</button>
             </div>
+            <div className= "account-type" >{accountType_}</div>
 
             {accountType === 'Chairman' && <>
             <h3>Add Candidate</h3>

@@ -7,12 +7,12 @@ import NavBar from './components/NavBar';
 import AdminPage from './components/AdminPage';
 import { useState, useEffect } from 'react';
 import Web3 from 'web3/dist/web3.min.js';
-import StakerContract from './StakerApp.json'
+import StakerContract from './Elect.json'
 import { contactAddress } from './contractAddress';
 
 function App() {
   const [electionPhase, setElectionPhase] = useState(0);
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState('login');
   const [accountType, setAccountType] = useState('Chairman');
   const [contractAvailability, setContractAvailability] = useState(true);
   // const [votingStarted, setVotingStarted] = useState(false)
@@ -21,7 +21,7 @@ function App() {
   const [contract, setContract] = useState({});
   const [loginNotice, setLoginNotice] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState('')
-  const [resultTime, setResultTime] = useState(false)
+  const [candidates, setCandidates] = useState([])
 
   const student = {
     name: "Ebube Ebube",
@@ -29,9 +29,9 @@ function App() {
     watchword: "I believe I will make G-DAO great."
   }
 
-  const handleVote = () => {
-    console.log("Voted for Ebube");
-  }
+  // const handleVote = () => {
+  //   console.log("Voted for Ebube");
+  // }
 
   const startVote = () => {
      contract.methods.beginVote().send({
@@ -65,24 +65,31 @@ function App() {
    }).catch((err) => {console.log(err) })
   }
 
-  const votingOngoing = async () => {
-    let p = await contract.methods.resultsPublished().call()
+  const getElectionPhase = async (contract) => {
+    let p = await contract.methods.getElectionPhase().call()
     return p;
   }
 
-  const isResultTime = async () => {
-    let p = await contract.methods.resultsPublished().call()
-    return p;
-  }
+  // const isResultTime = async () => {
+  //   let p = await contract.methods.getElectionPhase().call()
+  //   return p;
+  // }
 
-  const handleContractAvailability = async () => {
-    let p = await contract.methods.getAvailability().call()
+  const handleContractAvailability = async (contract) => {
+    let p = await contract.methods.isAvailable().call()
     return p;
   }
 
   const getAccountType = async (contract, address) => {
+    console.log(contract)
     let p = await contract.methods.getAccountType(address).call()
     return p;
+  }
+
+  const handleGetCandidates = async(contract) => {
+    let p = await contract.methods.getCandidates().call()
+    return p;
+
   }
 
   const handleSignIn = async (contract) => {
@@ -122,7 +129,7 @@ function App() {
         setSelectedAccount(accounts[0]);
         getAccountType(accounts[0]).then(p => {
           if (!['student', 'Chairman', 'teacher', 'Director'].includes(p)) {
-            alert('You have signed in with an unauthorized account. Contact the Chairman or any of the teachers')
+            alert('You tried signing in with an unauthorized account. Contact the Chairman or any of the teachers')
             setCurrentPage('login')
             return
           }
@@ -144,35 +151,47 @@ function App() {
       return;
     }
 
-    console.log(provider)
-
     const web3 = new Web3(provider);
     let contract = new web3.eth.Contract(
     	StakerContract.abi,
     	contactAddress
     );
+    setContract(contract);
     
 
-    handleSignIn(contract)
-    setContract(contract);
+    handleSignIn(contract).then((tx) => console.log(tx))
+
+    handleContractAvailability(contract).then(p => setContractAvailability(p));
+    // isResultTime().then(p => {
+    //   setResultTime(p)
+    // })
+
+    getElectionPhase(contract).then(p => {
+      setElectionPhase(p)
+    })
+
+    handleGetCandidates(contract).then(p => {
+      setCandidates(p)
+    })
+    
 
     // if (!selectedAccount) setCurrentPage('login')
 
   }, [])
 
-  useEffect(() => {
-    handleContractAvailability().then(p => setContractAvailability(p));
-    isResultTime().then(p => {
-      setResultTime(p)
-    })
+  // useEffect(() => {
+  //   handleContractAvailability().then(p => setContractAvailability(p));
+  //   // isResultTime().then(p => {
+  //   //   setResultTime(p)
+  //   // })
 
-    votingOngoing().then(p => {
-      p ? setElectionPhase(1) : setElectionPhase(0)
-    })
+  //   getElectionPhase().then(p => {
+  //     setElectionPhase(p)
+  //   })
 
 
 
-  }, [contract])
+  // }, [contract])
 
   const posts = ['President', 'Vice President'];
 
@@ -217,7 +236,7 @@ function App() {
           <h3>Welcome, {accountType}</h3>
         <hr/>
         {currentPage === 'home' && (electionPhase === 1 ? <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} contract = {contract}/> :
-        (resultTime ? <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} contract = {contract} isResultView = {true} resultsCompiled = {true}/> : 
+        (electionPhase ===3 ? <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} contract = {contract} isResultView = {true} resultsCompiled = {true}/> : 
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
           {electionPhase === 2 ? <p> Voting session has been concluded</p> : <p> Voting has not commenced yet</p>}
           <p> {'   '}</p>
@@ -225,11 +244,9 @@ function App() {
           </div>))}
           </> : fallback}
 
-
         {currentPage === 'admin' && <AdminPage startVote = {startVote} endVote = {endVote} accountType = {accountType} address = {selectedAccount}
         contract= {contract} enableContract= {enableContract} disableContract= {disableContract} contractLive = {contractAvailability} votingOccuring= {electionPhase < 2}
         candidates= {candidatesByPost} posts = {posts}/>}
-
       </div>
       </>) : loadPage}
       {/* <header className="App-header">

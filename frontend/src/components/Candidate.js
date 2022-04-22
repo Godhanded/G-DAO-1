@@ -4,7 +4,7 @@ const Candidate = ({student, handleVote, number, votedforCategory, isResultView,
     const [isVoted, setIsVoted] = useState(false);
 
     const setVote = () => {
-        isVoted ? handleVote(student.name, false) : handleVote(student.name, true);
+        isVoted ? handleVote(student.id, false) : handleVote(student.id, true);
         if (votedforCategory) return;
         setIsVoted(!isVoted);
     }
