@@ -156,6 +156,15 @@ code {
   
 }
 
+.interest-form button {
+  background-color: black;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
 .nav-bar {
   background-color: rgb(46, 46, 248);
   color: white;
@@ -218,6 +227,18 @@ code {
   align-items: center;
 }
 
+.admin-page button {
+  width: 30%;
+  height: 3rem;
+  border: 0;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+  color: white;
+  background-color: red;
+  margin-top: 1rem;
+}
+
 .start-and-end-vote {
   display: flex;
   flex-direction: row;
@@ -256,6 +277,32 @@ code {
   font-size: 15px;
   cursor: text;
 
+}
+
+.results-summary {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+}
+
+.results-summary-box {
+  display: flex;
+  width: 30%;
+  aspect-ratio: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.side-button {
+  float: left;
+  background-color: transparent;
+  color: black;
+  text-decoration: underline;
+  border: 0;
 }
 
 
