@@ -231,15 +231,17 @@ contract Elect is Ownable {
    * @notice this function collects the candidates name, checks if it exists then counts a vote for said candidate
    * @param candidate The name of the candidate
   */
-  function voteCandidate(uint256 candidate) public controlAccess stakeholder startvoting returns(bytes32){
+  function voteCandidate(uint256[] calldata candidate) external controlAccess stakeholder startvoting returns(bytes32){
 
     require(voted[msg.sender]==false,"You cant vote twice");
 
     /// @dev Make sure the candidate exists
-    require(Candidate[candidate] == true, "This is not a candidate");
-
+    for(uint256 i = 0; i<candidate.length;i++)
+    {
+    require(Candidate[candidate[i]] == true, "Someone is not a candidate");   
+     votesReceived[candidate[i]] += 1;
+    }
     voted[msg.sender]= true;
-    votesReceived[candidate] += 1;
     return "voted";
   }
 
@@ -295,12 +297,14 @@ contract Elect is Ownable {
       emit result (contestant[i], votesReceived[i]);
     }
 
-   }
+  }
    
     
   /**
    * @notice function shows the winner or winners of the election
    */
+
+   /**
    function showwinner()public otherStake
    {
     require(start == false,"voting has to end first");
@@ -324,46 +328,34 @@ contract Elect is Ownable {
     emit Winner(contestant[winnerid[i]], votesReceived[winnerid[i]]);
     }
   }
+  */
 
 
 
 /// @notice from here on contains functions for the login at the front end
 
    ///@notice chairman login
-  function ischairman()public view returns(bool)
+  function ischairman()public view returns(string memory)
   {
     if(msg.sender==chairman)
     {
-      return true;
-    }else
-    {
-      return false;
+      return "Chairman";
     }
-  }
-
-
      ///@notice other stake holders login
-  function isotherstakes()public view returns(bool)
-  {
-    if(otherStakes[msg.sender]==true)
+    else if(otherStakes[msg.sender]==true)
     {
-      return true;
-    }else
+      return "Teacher";
+    }
+   ///@notice students login
+    else if(Students[msg.sender]==true)
     {
-      return false;
+      return "student";
     }
   }
 
 
-   ///@notice students login
-  function isStudent()public view returns(bool)
+  function contractstate()public view returns(bool)
   {
-    if(Students[msg.sender]==true)
-    {
-      return true;
-    }else
-    {
-      return false;
-    }
+    return block.timestamp > dead;
   }
 }
