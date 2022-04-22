@@ -13,7 +13,7 @@ contract Elect is Ownable {
     dead = block.timestamp;
   }
   
-  /// @notice A list of candidates forr the election
+  /// @notice A list of candidates for the election
   string[] public candidateList;
     
   /// @notice A record for validity of candidate
@@ -33,6 +33,12 @@ contract Elect is Ownable {
 
   /// @notice  An official record of contestant information
   mapping (uint256 => candid) contestant;
+  
+  ///@notice mapping for other stake holders
+  mapping (address => bool) private otherStakes;
+
+  ///@notice mapping of students
+  mapping (address => bool) Students;
 
   /// @notice Time to stop a function
   uint256 dead;
@@ -46,7 +52,7 @@ contract Elect is Ownable {
   /// @notice The id of the winner
   uint256[] winnerid;
 
-  /// @notice The number of votes assigned to a candidate. Initialised as 0
+  /// @notice The number of candidates. Initialised as 0
   uint256 count = 0;
 
   /// @notice states the details of a candidate
@@ -84,6 +90,13 @@ contract Elect is Ownable {
     require(start==true,"Its not yet time to vote");
     _;
   }
+
+  //@notice mpdifier to check if other stakeholder
+  modifier otherStake
+  {
+    require(otherStakes[msg.sender]==true,"you dont have access");
+    _;
+  }
   
   /// @notice Moderator to control access to the smart contract
   modifier controlAccess{
@@ -105,6 +118,28 @@ contract Elect is Ownable {
   function disable() public {
     require(msg.sender == chairman,"You are not the chairman");
     dead = block.timestamp + 366 days;
+  }
+
+   /// @notice this functions clears the contents of the previously performed election so it can be reused
+  function clearData()public 
+  {
+    require(msg.sender == chairman,"no access");
+    require(start==false,"voting must end first");
+    for(uint256 i = 1; i <= count; i++)
+    {
+      delete Candidate[i];
+      delete contestant[i];
+      delete votesReceived[i];
+      delete contestant[i];
+      delete candidateList[i];
+    }
+    count=0;
+
+    for (uint256 i=0; i<candidateList.length; i++)
+    {
+      delete candidateList[i];
+    }
+    
   }
 
   /**
@@ -131,6 +166,7 @@ contract Elect is Ownable {
    */
   function setChairman(address _chairman) public onlyOwner {
     chairman = _chairman;
+    Access[_chairman]=true;
   }
   
   /**
@@ -140,6 +176,7 @@ contract Elect is Ownable {
   function addStudent(address[] memory _student)public onlyOwner controlAccess
   {
     for(uint i = 0; i < _student.length; i++) {
+        Students[_student[i]]=true;
         Access[_student[i]] = true;
     }
   }
@@ -151,6 +188,8 @@ contract Elect is Ownable {
   function addTeacher(address[] memory _teacher)public onlyOwner controlAccess
   {
     for(uint i = 0; i < _teacher.length; i++) {
+        teacher[_teacher[i]]=true;
+        otherStakes[_teacher[i]]=true;
         Access[_teacher[i]] = true;
     }
   }
@@ -162,6 +201,7 @@ contract Elect is Ownable {
   function addDirector(address[] memory _director) public onlyOwner controlAccess
   {
     for(uint i = 0; i < _director.length; i++) {
+        otherStakes[_director[i]]=true;
         Access[_director[i]] = true;
     }
   }
@@ -169,8 +209,6 @@ contract Elect is Ownable {
   /**
    * @notice this function adds a candidate to the contract
    * @notice it checks if the user is the chairman
-   * @dev hashed the name in candidate list and compared it with the hash of candidate using keccak256
-       this is because solidity doesnt compare two string types with ==
    * @param candidate The name of the candidate
    * @param position The position the candidate is vying for
    * @param link The ipfs link containing the image of the candidate
@@ -229,6 +267,8 @@ contract Elect is Ownable {
 
   /**
    * @notice this function checks if the candidate exists
+    * @dev hashed the name in candidate list and compared it with the hash of candidate using keccak256
+       this is because solidity does'nt compare two string types with ==
    * @param candidate The name of the candidate 
    * @return Whether or not the candidate exists
    */
@@ -245,9 +285,9 @@ contract Elect is Ownable {
 
    
   /**
-   * @notice function allows stakeholders to make the results of the election visible to all students
+   * @notice function allows otherstakeholders to make the results of the election visible to all students
    */
-  function publicResults()public controlAccess stakeholder
+  function publicResults()public controlAccess otherStake
   {
     require(start == false,"voting has to end first");
     for(uint256 i=1; i<=count; i++)
@@ -261,7 +301,7 @@ contract Elect is Ownable {
   /**
    * @notice function shows the winner or winners of the election
    */
-   function showwinner()public stakeholder
+   function showwinner()public otherStake
    {
     require(start == false,"voting has to end first");
     uint256 winvote=0;
@@ -285,4 +325,45 @@ contract Elect is Ownable {
     }
   }
 
+
+
+/// @notice from here on contains functions for the login at the front end
+
+   ///@notice chairman login
+  function ischairman()public view returns(bool)
+  {
+    if(msg.sender==chairman)
+    {
+      return true;
+    }else
+    {
+      return false;
+    }
+  }
+
+
+     ///@notice other stake holders login
+  function isotherstakes()public view returns(bool)
+  {
+    if(otherStakes[msg.sender]==true)
+    {
+      return true;
+    }else
+    {
+      return false;
+    }
+  }
+
+
+   ///@notice students login
+  function isStudent()public view returns(bool)
+  {
+    if(Students[msg.sender]==true)
+    {
+      return true;
+    }else
+    {
+      return false;
+    }
+  }
 }
