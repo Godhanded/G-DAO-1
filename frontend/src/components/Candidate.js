@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Candidate = ({student, handleVote, number, votedforCategory, isResultView, isWinner, votesCount}) => {
+const Candidate = ({student, handleVote, number, votedforCategory, isResultView, isWinner, isAdminView}) => {
     const [isVoted, setIsVoted] = useState(false);
 
     const setVote = () => {
@@ -20,10 +20,10 @@ const Candidate = ({student, handleVote, number, votedforCategory, isResultView,
 
             <h3>{student.name}</h3>
             {/* <p>{student.watchword}</p> */}
-            {!isResultView && <button onClick= {setVote}> {isVoted ? 'Unvote' : 'Vote'} </button>}
+            {!isResultView && !isAdminView && <button onClick= {setVote}> {isVoted ? 'Unvote' : 'Vote'} </button>}
             {isResultView && 
             <>
-            <p>Votes Count: {votesCount}</p>
+            <p>Votes Count: {student.votesCount}</p>
             {isWinner && <h3 style={{color: 'red'}}>Winner!!!</h3>}
             </>}
 
@@ -33,6 +33,7 @@ const Candidate = ({student, handleVote, number, votedforCategory, isResultView,
 
 Candidate.defaultProps = {
     isResultView: false,
+    isAdminView: false,
     isWinner: false,
     votesCount: 0
 }

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Candidate from './Candidate';
 
 
-const Voting = ({post, candidates, handleVote}) => {
+const Voting = ({post, candidates, handleVote, isResultView, isAdminView, resultsCompiled}) => {
     const [showContestants, setShowContestants] = useState(true);
     const [hasVoted, setHasVoted] = useState(false);
 
@@ -30,7 +30,9 @@ const Voting = ({post, candidates, handleVote}) => {
             {showContestants && <div className= "candidate-view">
                 {candidates.map((candidate, index) => {
                     return (<div key = {index}>
-                        < Candidate student = {candidate} handleVote = {checkVoted} number = {index + 1} votedforCategory= {hasVoted} />
+                        < Candidate student = {candidate} handleVote = {checkVoted} number = {index + 1} votedforCategory= {hasVoted} isResultView= {isResultView} 
+                        isWinner = {resultsCompiled && index===0}
+                        isAdminView = {isAdminView} />
                     </div>)
                     
                 })}
