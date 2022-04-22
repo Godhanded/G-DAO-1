@@ -225,9 +225,11 @@ function App() {
           </div>))}
           </> : fallback}
 
+
         {currentPage === 'admin' && <AdminPage startVote = {startVote} endVote = {endVote} accountType = {accountType} address = {selectedAccount}
         contract= {contract} enableContract= {enableContract} disableContract= {disableContract} contractLive = {contractAvailability} votingOccuring= {electionPhase < 2}
         candidates= {candidatesByPost} posts = {posts}/>}
+
       </div>
       </>) : loadPage}
       {/* <header className="App-header">

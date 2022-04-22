@@ -2,17 +2,21 @@ import { useState } from 'react';
 import * as ipfsClient from 'ipfs-http-client';
 import VotingPage from './VotingPage';
 
+
 const AdminPage = ({contract, startVote, endVote, accountType, address, enableContract, disableContract, contractLive, votingOccuring, candidates, posts}) => {
+
     const [newAdmin, setNewAdmin] = useState('')
     const [candidateName, setCandidateName] = useState('')
     const [position, setPosition] = useState('')
     const [picture, setPicture] = useState(null)
+
     const [viewCandidates, setViewCandidates] = useState(false)
     const [viewResults, setViewResults] = useState(false)
     const [file, setFile] = useState()
     const create = ipfsClient.create;
-	const client = create(`https://ipfs.infura.io:5001/api/v0`);
+	  const client = create(`https://ipfs.infura.io:5001/api/v0`);
     const fileReader = new FileReader();
+
 
     const handleStartVote = () => {
         console.log('Started Voting season');
@@ -28,6 +32,7 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
         console.log(newAdmin);
         setNewAdmin('');
     }
+
 
     const handleAddStakeholders = (e) => {
         e.preventDefault();
@@ -66,8 +71,8 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
 		} 
     }
 
-    const handleAddCandidate = async () => {
-        console.log(picture)
+
+    const handleAddCandidate = () => {
         if (picture === null) {
 			alert('Please upload an image');
         return;
@@ -76,7 +81,6 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
 			const res = await client.add(picture, {
 				progress: (prog) => console.log(`received: ${prog}`)
 			});
-            console.log(res.path);
             await contract.methods.addCandidate(
 				candidateName,
 				position,
@@ -87,6 +91,7 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
             setCandidateName('')
             setPosition('')
             setPicture(null)
+
         } 
         catch (error) {
 			alert(error);
@@ -126,7 +131,7 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
                         <label htmlFor="candidateName">  Full Name </label>
                         <input type= "text" placeholder= "Enter full name here" value= {candidateName} onChange= {(e)=> setCandidateName(e.target.value)} />
 
-                        <label htmlFor="level"> Position </label>
+                        <label htmlFor="position"> Position </label>
                         <input type= "text" placeholder= "Enter position here" value= {position} onChange= {(e)=> setPosition(e.target.value)} />
 
                         <label htmlFor="picture"> Photograph </label>
