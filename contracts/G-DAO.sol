@@ -171,39 +171,29 @@ contract Elect is Ownable {
   
   /**
    * @notice Adds an array of student to have access as a stakeholder
-   * @param _student The address of the student to be given access
-   */
-  function addStudent(address[] memory _student)public onlyOwner controlAccess
-  {
-    for(uint i = 0; i < _student.length; i++) {
-        Students[_student[i]]=true;
-        Access[_student[i]] = true;
-    }
-  }
-
-  /**
    * @notice Adds an array of teacher to have access as a stakeholder
-   * @param _teacher The address of the student to be given access
-   */
-  function addTeacher(address[] memory _teacher)public onlyOwner controlAccess
-  {
-    for(uint i = 0; i < _teacher.length; i++) {
-        teacher[_teacher[i]]=true;
-        otherStakes[_teacher[i]]=true;
-        Access[_teacher[i]] = true;
-    }
-  }
-
-  /**
    * @notice Adds an array of director to have access as a stakeholder
-   * @param _director The address of the director to be given access
+   * @param addresses The address to be given roles
+   * @param accountTypes array of the account type
    */
-  function addDirector(address[] memory _director) public onlyOwner controlAccess
-  {
-    for(uint i = 0; i < _director.length; i++) {
-        otherStakes[_director[i]]=true;
-        Access[_director[i]] = true;
-    }
+   function addStakeholders(address[] memory addresses, string[] memory accountTypes) public onlyOwner controlAccess {
+      require(addresses.length == accountTypes.length, "the roles and addresses provided differ");     
+      for (uint i = 0; i < addresses.length; i++) {
+         require(addresses[i]!=address(0),"no zero address");
+          if (keccak256(abi.encodePacked(accountTypes[i])) == keccak256(abi.encodePacked('student'))) {
+              Students[addresses[i]] = true;
+              Access[addresses[i]] = true;
+          } else if (keccak256(abi.encodePacked(accountTypes[i])) == keccak256(abi.encodePacked('Teacher'))) {
+               teacher[addresses[i]]=true;
+               otherStakes[addresses[i]]=true;
+               Access[addresses[i]] = true;
+          } else if (keccak256(abi.encodePacked(accountTypes[i])) == keccak256(abi.encodePacked('Director'))) {
+                 otherStakes[addresses[i]]=true;
+                 Access[addresses[i]] = true;
+          } else {
+              continue;
+          }
+      }
   }
 
   /**
@@ -335,7 +325,7 @@ contract Elect is Ownable {
 /// @notice from here on contains functions for the login at the front end
 
    ///@notice chairman login
-  function ischairman()public view returns(string memory)
+  function login()public view returns(string memory)
   {
     if(msg.sender==chairman)
     {
