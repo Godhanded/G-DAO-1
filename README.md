@@ -8,3 +8,6 @@ ZURI as an organisation needs to setup an election for leadership position in it
  3. Only the chairman and teachers can setup and compile the result of the votes
  4. Only the chairman can grant access for the vote to happen.(There should be enable and disable vote.). If vote is disabled, no voting should take place.
  5. students should not see result of votes until made public by the other stakeholders
+
+
+#uI link: https://g-daovoting.netlify.app/
