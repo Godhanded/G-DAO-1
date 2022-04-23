@@ -64,7 +64,7 @@ describe ("G-DAO contract", function() {
 
 
        it("should fail if its not time to vote",async function(){
-           await GDAO.addStakeholders([owner.address],[Teacher]);
+           await GDAO.addStakeholders([addr3.address], ["Teacher"]);
 
            await expect (GDAO.voteCandidate([1])).to.be.revertedWith("Its not yet time to vote");
 
@@ -87,8 +87,8 @@ describe ("G-DAO contract", function() {
 
        it("should not vote if not a candidate",async function(){
            await GDAO.connect(owner).beginVote();
-           await GDAO.addStakeholders([owner.address],[Teacher]);
-          await expect(GDAO.connect(owner).voteCandidate([1])).to.be.revertedWith("This is not a candidate");
+           await GDAO.addStakeholders([owner.address],["Teacher"]);
+          await expect(GDAO.connect(owner).voteCandidate([1])).to.be.revertedWith("Someone is not a candidate");
        });
 
 
@@ -100,7 +100,7 @@ describe ("G-DAO contract", function() {
 
        it("should vote if candidate exists and is time",async function(){
            await GDAO.addCandidate("ed","head","ipfs.io/ipfs/21323244hfjb34j");
-           await GDAO.addStakeholders([owner.address],[Teacher]);
+           await GDAO.addStakeholders([owner.address],["Teacher"]);
             await GDAO.beginVote();
             const candidVote = await GDAO.voteCandidate([1]);
             console.log (candidVote)
@@ -124,7 +124,7 @@ describe ("Add Candidate", function() {
 describe ("Vote Candidate", function() {
     it("should be able to vote a candidate", async function(){   
         await GDAO.connect(owner).beginVote();     
-        await GDAO.addStakeholders([addr1.address],[Teacher]);
+        await GDAO.addStakeholders([addr1.address],["Teacher"]);
         addCandidate = await GDAO.connect(owner).addCandidate (
             "ed",
             "head",
@@ -139,24 +139,23 @@ describe ("Vote Candidate", function() {
     });
 });
 
-describe ("candidatevotes", function() {
+describe ("candidate Votes", function() {
     it("should not show candidate votes if not candidate", async function(){
-        await expect(GDAO.candidateVotes(1)).to.be.revertedWith("This is not a candidate");
+        await expect(GDAO.candidateVotes(0)).to.be.revertedWith("This is not a candidate");
     });
 });
 
 describe ("publicResults", function() {
     it("should not show result if voting not ended", async function(){
         await GDAO.beginVote();
-        expect(await GDAO.publicResults().to.be.revertedWith("voting has to end first"));
+        await expect(GDAO.publicResults()).to.be.revertedWith("voting has to end first");
     });
 });
 
 describe ("contractstate", function() {
     it("should return true",async function(){
-         check = await GDAO.contractstate()
-         const result= await check.wait();
-         expect(result.status).to.equal(true);
+         const check = await GDAO.contractstate()
+         expect(check).to.equal(true);
     });
 });
 
@@ -172,13 +171,13 @@ describe("addStakeholders",function(){
     });
 });
 
-describe("endVote"function(){
+describe("endVote", function(){
     it("should not end vote if not chairman", async function(){
         await expect(GDAO.connect(addr1).endVote()).to.be.revertedWith("you're not the chairman ");
     });
 });
 
-describe("beginVote"function(){
+describe("beginVote",function(){
     it("should not beginVote if not chairman", async function(){
         await expect(GDAO.connect(addr1).beginVote()).to.be.revertedWith("you're not the chairman");
     });
