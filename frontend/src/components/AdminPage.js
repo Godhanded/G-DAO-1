@@ -15,7 +15,7 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
     const [file, setFile] = useState()
     const [accountType_, setAccountType_] = useState('')
     const create = ipfsClient.create;
-	  const client = create(`https://ipfs.infura.io:5001/api/v0`);
+	const client = create(`https://ipfs.infura.io:5001/api/v0`);
     const fileReader = new FileReader();
 
 
@@ -68,10 +68,11 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
 
             };
 
+
             fileReader.readAsText(file);
         }
 
-        if (res.length === roles.length) {
+        if (res.length === roles.length && res.length !== 0) {
             try {
                 await contract.methods.addStakeholders().send({from : address})
                 alert('Results set to Published');	
@@ -192,7 +193,7 @@ const AdminPage = ({contract, startVote, endVote, accountType, address, enableCo
             {viewCandidates && <VotingPage posts= {posts} candidatesByPost= {candidates} isAdminView= {true}/>}
             {viewResults && <VotingPage posts= {posts} candidatesByPost= {candidates} isResultView= {true} />}
 
-            {viewResults && <button onClick= {handlePublishResults}> Publish Results</button>}
+            <button onClick= {handlePublishResults}> Publish Results</button>
             
         </div>
         </>

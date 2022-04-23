@@ -3,7 +3,7 @@ import Voting from './Voting';
 import ResultSummary from './ResultSummary';
 import AdminPage from './AdminPage';
 
-const VotingPage = ({posts, candidatesByPost, isResultView, isAdminView, resultsCompiled, contract}) => {
+const VotingPage = ({posts, candidatesByPost, isResultView, isAdminView, resultsCompiled, contract, address}) => {
     const [votes, setVotes] = useState([]);
     const [noOfVotes, setNoOfVotes] = useState(0);
 
@@ -11,14 +11,23 @@ const VotingPage = ({posts, candidatesByPost, isResultView, isAdminView, results
         checker ? setVotes([...votes, name]) : setVotes(votes.filter(t => t !== name));
     }
 
-    const handleSubmitVotes = () => {
+    const handleSubmitVotes = async () => {
         console.log(votes);
+
+        try {
+            await contract.methods.voteCandidates(votes).send({from : address})
+            alert('Votes Sent');
+        } 
+        catch (error) {
+			alert(error);
+		}
     }
 
     useEffect(() => {
         if (isResultView) {
             let sum_ = candidatesByPost.reduce((acc, curr) => acc + curr.votesCount, 0);
             setNoOfVotes(sum_);
+            
         }
     }, [candidatesByPost, isResultView])
 

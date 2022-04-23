@@ -1,37 +1,31 @@
 import './App.css';
-import Candidate from './components/Candidate';
 import Landing from './components/Landing';
 import VotingPage from './components/VotingPage';
-import DeclareInterest from './components/DeclareInterest';
 import NavBar from './components/NavBar';
 import AdminPage from './components/AdminPage';
 import { useState, useEffect } from 'react';
 import Web3 from 'web3/dist/web3.min.js';
-import StakerContract from './Elect.json'
+import { CONTRACT_ABI } from './constants';
 import { contactAddress } from './contractAddress';
 
+
 function App() {
-  const [electionPhase, setElectionPhase] = useState(0);
+  const [electionPhase, setElectionPhase] = useState(1);
   const [currentPage, setCurrentPage] = useState('login');
   const [accountType, setAccountType] = useState('Chairman');
   const [contractAvailability, setContractAvailability] = useState(true);
-  // const [votingStarted, setVotingStarted] = useState(false)
-  // const [votingEnded, setVotingEnded] = useState(false)
   const [loaded, setLoaded] = useState(false);
   const [contract, setContract] = useState({});
   const [loginNotice, setLoginNotice] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState('')
   const [candidates, setCandidates] = useState([])
+  const [posts, setPosts] = useState([])
 
   const student = {
     name: "Ebube Ebube",
     CID: "QmaXjpTENetYrqHicuyNweCgVdLHuEqLQ3PrwQ4MAMc1SS",
     watchword: "I believe I will make G-DAO great."
   }
-
-  // const handleVote = () => {
-  //   console.log("Voted for Ebube");
-  // }
 
   const startVote = () => {
      contract.methods.beginVote().send({
@@ -70,31 +64,70 @@ function App() {
     return p;
   }
 
-  // const isResultTime = async () => {
-  //   let p = await contract.methods.getElectionPhase().call()
-  //   return p;
-  // }
-
   const handleContractAvailability = async (contract) => {
-    let p = await contract.methods.isAvailable().call()
+    let p = await contract.methods.contractstate().call()
     return p;
   }
 
-  const getAccountType = async (contract, address) => {
-    console.log(contract)
-    let p = await contract.methods.getAccountType(address).call()
+  const getAccountType = async (contract_, address) => {
+    console.log(contract_)
+    let p = await contract_.methods.login().call({from : address})
     return p;
   }
 
-  const handleGetCandidates = async(contract) => {
-    let p = await contract.methods.getCandidates().call()
-    return p;
+  const handleGetCandidates = async (contract) => {
+
+    let k = await contract.getPastEvents('candidates', {fromBlock: 0})
+    let result_ = []
+    let res = []
+    k.map((ele, id) => {
+      let p = {}
+      p.ID = ele.returnValues.ID
+      p.name = ele.returnValues.name
+      p.ipfs = ele.returnValues.ipfs
+      p.position = ele.returnValues.position
+
+      if (!res.includes(ele.returnValues.position)) {
+        res.push(ele.returnValues.position)
+      }
+
+      result_.push(p)
+      
+    })
+
+    setPosts(res);
+
+    setCandidates(result_)
+    console.log(result_)
 
   }
 
-  const handleSignIn = async (contract) => {
+  const handleGetResults = async (contract) => {
+    // let p = await contract.methods.getCandidates().call()
+    // return p;
+
+    let k = await contract.getPastEvents('result', {fromBlock: 0})
+    let result_ = []
+    k.map((ele, id) => {
+      let p = {}
+      p.ID = ele.returnValues.Candid.ID
+      p.name = ele.returnValues.Candid.name
+      p.ipfs = ele.returnValues.Candid.ipfs
+      p.position = ele.returnValues.Candid.position
+      p.votesCount = ele.reurnValues.votes
+
+      result_.push(p)
+      
+    })
+
+    setCandidates(result_)
+    console.log(result_)
+
+  }
+
+  const handleSignIn = async (contract_) => {
     let provider = window.ethereum;
-    console.log(provider);
+    console.log(contract_);
     setLoaded(true)
   
     if (typeof provider !== 'undefined') {
@@ -103,9 +136,10 @@ function App() {
         .then((accounts) => {
           setSelectedAccount(accounts[0]);
           console.log(`Selected account is ${selectedAccount}`);
+          setCurrentPage('home')
 
-          getAccountType(contract, accounts[0]).then(p => {
-            if (!['student', 'Chairman', 'teacher', 'Director'].includes(p)) {
+          getAccountType(contract_, accounts[0]).then(p => {
+            if (!['student', 'Chairman', 'teacher'].includes(p)) {
               alert('You have signed in with an unauthorized account. Contact the Chairman or any of the teachers')
               setCurrentPage('login')
               setLoaded(false)
@@ -128,7 +162,7 @@ function App() {
         setLoaded(true)
         setSelectedAccount(accounts[0]);
         getAccountType(accounts[0]).then(p => {
-          if (!['student', 'Chairman', 'teacher', 'Director'].includes(p)) {
+          if (!['student', 'Chairman', 'teacher'].includes(p)) {
             alert('You tried signing in with an unauthorized account. Contact the Chairman or any of the teachers')
             setCurrentPage('login')
             return
@@ -152,68 +186,59 @@ function App() {
     }
 
     const web3 = new Web3(provider);
-    let contract = new web3.eth.Contract(
-    	StakerContract.abi,
+    let contract_ = new web3.eth.Contract(
+    	CONTRACT_ABI,
     	contactAddress
     );
-    setContract(contract);
+    console.log(contract_)
+    setContract(contract_);
+
+    handleSignIn(contract_).then((tx) => console.log(tx))
+
+    handleContractAvailability(contract_).then(p => {
+      console.log(p)
+      setContractAvailability(p)});
     
 
-    handleSignIn(contract).then((tx) => console.log(tx))
-
-    handleContractAvailability(contract).then(p => setContractAvailability(p));
-    // isResultTime().then(p => {
-    //   setResultTime(p)
-    // })
-
-    getElectionPhase(contract).then(p => {
+    getElectionPhase(contract_).then(p => {
       setElectionPhase(p)
     })
 
-    handleGetCandidates(contract).then(p => {
-      setCandidates(p)
-    })
+    handleGetCandidates(contract_)
     
 
-    // if (!selectedAccount) setCurrentPage('login')
 
   }, [])
 
-  // useEffect(() => {
-  //   handleContractAvailability().then(p => setContractAvailability(p));
-  //   // isResultTime().then(p => {
-  //   //   setResultTime(p)
-  //   // })
+  useEffect(() => {
 
-  //   getElectionPhase().then(p => {
-  //     setElectionPhase(p)
-  //   })
+    if (electionPhase === 3) {
+      handleGetResults(contract)
+    }
 
+  }, [electionPhase, contract])
 
+  // const posts = ['President', 'Vice President'];
 
-  // }, [contract])
-
-  const posts = ['President', 'Vice President'];
-
-  const candidatesByPost = [{name: 'John Mike', watchword: 'I came to save', CID: 'QmaXjpTENetYrqHicuyNweCgVdLHuEqLQ3PrwQ4MAMc1SS',
-    post: 'President' },
-    {
-      name: "Ebube Ebube",
-      CID: "QmaXjpTENetYrqHicuyNweCgVdLHuEqLQ3PrwQ4MAMc1SS",
-      watchword: "I believe I will make G-DAO great.",
-      post: 'President'
-    },
-    {
-      name: "Ebube Junior",
-      CID: "QmaXjpTENetYrqHicuyNweCgVdLHuEqLQ3PrwQ4MAMc1SS",
-      watchword: "I believe I will make G-DAO great.",
-      post: 'Vice President'
-    }, {
-      name: "Ebube Jack",
-      CID: "QmaXjpTENetYrqHicuyNweCgVdLHuEqLQ3PrwQ4MAMc1SS",
-      watchword: "I believe I will make G-DAO great.",
-      post: 'Vice President'
-    }];
+  // const candidatesByPost = [{name: 'John Mike', watchword: 'I came to save', CID: 'QmaXjpTENetYrqHicuyNweCgVdLHuEqLQ3PrwQ4MAMc1SS',
+  //   post: 'President' },
+  //   {
+  //     name: "Ebube Ebube",
+  //     CID: "QmaXjpTENetYrqHicuyNweCgVdLHuEqLQ3PrwQ4MAMc1SS",
+  //     watchword: "I believe I will make G-DAO great.",
+  //     post: 'President'
+  //   },
+  //   {
+  //     name: "Ebube Junior",
+  //     CID: "QmaXjpTENetYrqHicuyNweCgVdLHuEqLQ3PrwQ4MAMc1SS",
+  //     watchword: "I believe I will make G-DAO great.",
+  //     post: 'Vice President'
+  //   }, {
+  //     name: "Ebube Jack",
+  //     CID: "QmaXjpTENetYrqHicuyNweCgVdLHuEqLQ3PrwQ4MAMc1SS",
+  //     watchword: "I believe I will make G-DAO great.",
+  //     post: 'Vice President'
+  //   }];
 
   const loadPage = (<div>
     <p>Loading .....</p>
@@ -228,15 +253,15 @@ function App() {
 
   return (
     <div className="App">
-      {!loaded ? (currentPage === 'login' ? <Landing handleSignIn= {handleSignIn} notice = {loginNotice} /> :
+      {!loaded ? (currentPage === 'login' ? <Landing handleSignIn= {() => handleSignIn(contract)} notice = {loginNotice} /> :
       <>
       <NavBar address = {selectedAccount} accountType = {accountType} toggleHome = {(homeOrAdmin) => setCurrentPage(homeOrAdmin)} disconnectAccount= {()=> setCurrentPage('login')} />
       <div className= "layout">
         { contractAvailability ? <>
           <h3>Welcome, {accountType}</h3>
         <hr/>
-        {currentPage === 'home' && (electionPhase === 1 ? <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} contract = {contract}/> :
-        (electionPhase ===3 ? <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} contract = {contract} isResultView = {true} resultsCompiled = {true}/> : 
+        {currentPage === 'home' && (electionPhase === 1 ? <VotingPage posts = {posts} candidatesByPost = {candidates} contract = {contract} address= {selectedAccount} /> :
+        (electionPhase ===3 ? <VotingPage posts = {posts} candidatesByPost = {candidates} contract = {contract} isResultView = {true} resultsCompiled = {true}/> : 
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
           {electionPhase === 2 ? <p> Voting session has been concluded</p> : <p> Voting has not commenced yet</p>}
           <p> {'   '}</p>
@@ -246,18 +271,10 @@ function App() {
 
         {currentPage === 'admin' && <AdminPage startVote = {startVote} endVote = {endVote} accountType = {accountType} address = {selectedAccount}
         contract= {contract} enableContract= {enableContract} disableContract= {disableContract} contractLive = {contractAvailability} votingOccuring= {electionPhase < 2}
-        candidates= {candidatesByPost} posts = {posts}/>}
+        candidates= {candidates} posts = {posts}/>}
       </div>
       </>) : loadPage}
-      {/* <header className="App-header">
       
-      
-      <Candidate student = {student} handleVote = {handleVote} />
-      <VotingPage posts = {posts} candidatesByPost = {candidatesByPost} />
-      <DeclareInterest posts = {posts} />
-      
-        
-      </header> */}
     </div>
   );
 }
