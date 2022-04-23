@@ -31,6 +31,9 @@ contract Elect is Ownable {
   /// @notice A record of addresses assigned as teachers
   mapping (address => bool) private teacher;
 
+  /// @notice A record of addresses assigned as directors
+  mapping (address => bool) private director;
+
   /// @notice  An official record of contestant information
   mapping (uint256 => candid) contestant;
   
@@ -49,11 +52,11 @@ contract Elect is Ownable {
   /// @notice State for a function
   bool start;
 
-  /// @notice The id of the winner
-  uint256[] winnerid;
-
   /// @notice The number of candidates. Initialised as 0
   uint256 count = 0;
+
+  /// @notice The phase of election, initialised as 0
+  uint256 private electionPhase = 0;
 
   /// @notice states the details of a candidate
   struct candid
@@ -149,6 +152,7 @@ contract Elect is Ownable {
   {
     require(msg.sender== chairman,"you're not the chairman");
     start = true;
+    electionPhase = 1;
   }
 
   /**
@@ -158,6 +162,7 @@ contract Elect is Ownable {
   {
     require(msg.sender==chairman,"you're not the chairman ");
     start = false;
+    electionPhase = 2;
   }
 
   /**
@@ -167,6 +172,7 @@ contract Elect is Ownable {
   function setChairman(address _chairman) public onlyOwner {
     chairman = _chairman;
     Access[_chairman]=true;
+    otherStakes[_chairman]=true;
   }
   
   /**
@@ -187,6 +193,7 @@ contract Elect is Ownable {
                otherStakes[addresses[i]]=true;
                Access[addresses[i]] = true;
           } else if (keccak256(abi.encodePacked(accountTypes[i])) == keccak256(abi.encodePacked('Director'))) {
+                 teacher[addresses[i]]=true;
                  otherStakes[addresses[i]]=true;
                  Access[addresses[i]] = true;
           } else {
@@ -285,63 +292,41 @@ contract Elect is Ownable {
     {
       emit result (contestant[i], votesReceived[i]);
     }
+    electionPhase = 3;
 
   }
-   
-    
-  /**
-   * @notice function shows the winner or winners of the election
-   */
 
-   /**
-   function showwinner()public otherStake
-   {
-    require(start == false,"voting has to end first");
-    uint256 winvote=0;
-    for(uint256 i=1; i<=count; i++)
-    {
-        if(votesReceived[i]>winvote)
-        {
-            winvote=votesReceived[i];
-            delete winnerid;
-            winnerid.push(i);
-
-        }else if(votesReceived[i]==winvote)
-        {
-            winnerid.push(i);
-        }
-        
-    }
-    for(uint256 i=0; i<winnerid.length; i++)
-    {
-    emit Winner(contestant[winnerid[i]], votesReceived[winnerid[i]]);
-    }
+  function getElectionPhase() public view returns(uint256) {
+    return electionPhase;
   }
-  */
-
 
 
 /// @notice from here on contains functions for the login at the front end
 
    ///@notice chairman login
-  function login()public view returns(string memory)
+  function login(address user)public view returns(string memory)
   {
-    if(msg.sender==chairman)
+    if(user==chairman)
     {
       return "Chairman";
     }
-     ///@notice other stake holders login
-    else if(otherStakes[msg.sender]==true)
+     ///@notice other teachers login
+    else if(teacher[user]==true)
     {
       return "Teacher";
     }
-   ///@notice students login
-    else if(Students[msg.sender]==true)
+    ///@notice other directors login
+    else if(director[user]==true)
     {
-      return "student";
+      return "Director";
     }
+   ///@notice students login
+    else if(Students[user]==true)
+    {
+      return "Student";
+    }
+    return "Not Authorised";
   }
-
 
   function contractstate()public view returns(bool)
   {
