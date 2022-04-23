@@ -11,3 +11,5 @@ ZURI as an organisation needs to setup an election for leadership position in it
 
 
 #uI link: https://g-daovoting.netlify.app/
+
+#uI manual: https://docs.google.com/document/d/1RR7kwWIXY25usD3EvNXTioLv51Ja1C3CGtTvnodlFZk/edit?usp=sharing
